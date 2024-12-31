@@ -14,8 +14,104 @@ datasource db {
 }
 
 model Business {
-  id       Int     @id @default(autoincrement())
-  name     String?
-  email    String  @unique
-  password String
+  id                    Int                     @id @default(autoincrement())
+  name                  String?
+  email                 String                  @unique
+  password              String
+  created_at            DateTime                @default(now())
+  updated_at            DateTime                @updatedAt
+  Party                 Party[]
+  Inventory             Inventory[]
+  Inventory_transaction Inventory_transaction[]
+  Transaction           Transaction[]
+
+  @@map("Business")
+}
+
+model Party {
+  id          Int           @id @default(autoincrement())
+  name        String?
+  email       String?
+  phone_no    String?
+  business    Business      @relation(fields: [business_id], references: [id])
+  business_id Int
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  Transaction Transaction[]
+
+  @@map("Party")
+}
+
+model Inventory {
+  id                    Int                     @id @default(autoincrement())
+  name                  String?
+  purchase_price        Int
+  sell_price            Int
+  tax_rate              Int?
+  quantity              Int                     @default(0)
+  min_quantity          Int                     @default(0)
+  business              Business                @relation(fields: [business_id], references: [id])
+  business_id           Int
+  created_at            DateTime                @default(now())
+  updated_at            DateTime                @updatedAt
+  Inventory_transaction Inventory_transaction[]
+  Transaction_items     Transaction_items[]
+
+  @@map("Inventory")
+}
+
+model Inventory_transaction {
+  id              Int       @id @default(autoincrement())
+  adjust_quantity Int
+  price_per_unit  Int
+  inventory       Inventory @relation(fields: [inventory_id], references: [id])
+  business        Business  @relation(fields: [business_id], references: [id])
+
+  inventory_id Int
+  business_id  Int
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@map("Inventory_transaction")
+}
+
+model Transaction_type {
+  id          Int           @id @default(autoincrement())
+  name        String
+  Transaction Transaction[]
+
+  @@map("Transaction_type")
+}
+
+model Transaction {
+  id Int @id @default(autoincrement())
+
+  business          Business            @relation(fields: [business_id], references: [id])
+  business_id       Int
+  type              Transaction_type    @relation(fields: [type_id], references: [id])
+  party             Party               @relation(fields: [party_id], references: [id])
+  party_id          Int
+  type_id           Int
+  created_at        DateTime            @default(now())
+  updated_at        DateTime            @updatedAt
+  Transaction_items Transaction_items[]
+
+  @@map("Transaction")
+}
+
+model Transaction_items {
+  id Int @id @default(autoincrement())
+
+  inventory    Inventory @relation(fields: [inventory_id], references: [id])
+  inventory_id Int
+
+  transaction    Transaction @relation(fields: [transaction_id], references: [id])
+  transaction_id Int
+  quantity       Int
+  price_per_unit Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("Transaction_items")
 }
