@@ -24,7 +24,7 @@ export const login = async (
         req.login(user, { session: false }, async (error) => {
           if (error) return next(error);
 
-          const body = { id: user.id, email: user.email };
+          const body = { id: user.id };
           const token = jwt.sign({ user: body }, "TOP_SECRET");
 
           return res.json({ token, message: info.message });
@@ -39,6 +39,6 @@ export const login = async (
 export const signup = async (req: Request, res: Response) => {
   res.json({
     message: "Signed successful",
-    user: req.user,
+    token: req.user,
   });
 };

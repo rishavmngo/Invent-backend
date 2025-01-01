@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import passport from "passport";
 import { Strategy as localStrategy } from "passport-local";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
 import {
   Strategy as JWTstrategy,
   ExtractJwt as ExtractJWT,
@@ -9,10 +11,10 @@ import {
 const prisma = new PrismaClient();
 
 export const verifyPassword = async (
-  user: { name: string; email: string; password: string },
+  user_password: string,
   password: string,
 ) => {
-  return await bcrypt.compare(password, user.password);
+  return await bcrypt.compare(password, user_password);
 };
 export const hashPassword = async (password: string) => {
   const salt = await bcrypt.genSalt(10);
@@ -26,13 +28,16 @@ passport.use(
       passwordField: "password",
     },
     async (email, password, done) => {
-      // const encryptedPassword = hashPassword(password)
+      const encryptedPassword = await hashPassword(password);
       try {
         const user = await prisma.business.create({
-          data: { email, password },
+          data: { email, password: encryptedPassword },
         });
 
-        return done(null, user);
+        const body = { id: user.id };
+        const token = jwt.sign({ user: body }, "TOP_SECRET");
+
+        return done(null, token);
       } catch (error) {
         done(error);
       }
@@ -53,8 +58,9 @@ passport.use(
         if (!user) {
           return done(null, false, { message: "User not found" });
         }
+        const validate = await verifyPassword(user.password, password);
 
-        const validate = password === user.password;
+        // const validate = dcrypted_password === user.password;
 
         if (!validate) {
           return done(null, false, { message: "Wrong Password" });
