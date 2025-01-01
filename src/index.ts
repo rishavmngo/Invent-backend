@@ -1,11 +1,12 @@
-import express from "express";
+import express, { Request } from "express";
 import config from "./config/config";
-import authRoute from "./features/auth/auth.route";
+import authRoute from "./features/auth/auth-route";
 import cors from "cors";
-import "./features/auth/authStrategies";
+import "./features/auth/auth-strategies";
 import passport from "passport";
-import apiRoutes from "./features/api/api";
+import apiRoutes from "./features/api/api-route";
 import logger from "./lib/logger/logger";
+import "./types/types";
 
 const app = express();
 
@@ -26,12 +27,16 @@ app.get("/", (req, res) => {
 
 app.use("/auth", authRoute);
 
-app.use("/api", passport.authenticate("jwt", { session: false }), apiRoutes);
-// app.use(
-//   "/inventory",
-//   passport.authenticate("jwt", { session: false }),
-//   inventoryRoutes,
-// );
+app.use(
+  "/api",
+  passport.authenticate("jwt", { session: false }),
+  (req: Request, res, next) => {
+    req.id = (req.user as { id: number }).id;
+
+    next();
+  },
+  apiRoutes,
+);
 
 app.listen(config.PORT, () => {
   console.log(`Sever is running on ${config.PORT}`);
