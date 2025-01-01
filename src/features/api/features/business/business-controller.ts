@@ -15,3 +15,16 @@ export const getBusiness = async (req: Request, res: Response) => {
   });
   res.json(result);
 };
+
+export const updateBusiness = async (req: Request, res: Response) => {
+  const { name } = req.body;
+  const result = await prisma.business.update({
+    where: {
+      id: req.id,
+    },
+    data: {
+      name: name,
+    },
+  });
+  res.json(result);
+};
