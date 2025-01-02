@@ -31,8 +31,8 @@ model Business {
 
 model Party {
   id          Int           @id @default(autoincrement())
-  name        String?
-  email       String?
+  name        String
+  email       String?       @unique
   phone_no    String?
   business    Business      @relation(fields: [business_id], references: [id])
   business_id Int
@@ -61,6 +61,12 @@ model Inventory {
   @@map("Inventory")
 }
 
+enum Inventory_transaction_type {
+  OPEN
+  ADD
+  REDUCE
+}
+
 model Inventory_transaction {
   id              Int       @id @default(autoincrement())
   adjust_quantity Int
@@ -68,10 +74,11 @@ model Inventory_transaction {
   inventory       Inventory @relation(fields: [inventory_id], references: [id])
   business        Business  @relation(fields: [business_id], references: [id])
 
-  inventory_id Int
-  business_id  Int
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  inventory_id     Int
+  business_id      Int
+  transaction_type Inventory_transaction_type
+  created_at       DateTime                   @default(now())
+  updated_at       DateTime                   @updatedAt
 
   @@map("Inventory_transaction")
 }

@@ -1,12 +1,16 @@
 import express, { Request } from "express";
 import config from "./config/config";
-import authRoute from "./features/auth/auth-route";
+import authRoute from "./features/auth/auth.route";
 import cors from "cors";
-import "./features/auth/auth-strategies";
+import "./features/auth/auth.strategies";
 import passport from "passport";
-import apiRoutes from "./features/api/api-route";
+import apiRoutes from "./features/api/api.route";
 import logger from "./lib/logger/logger";
 import "./types/types";
+import { errorHandler } from "./lib/error/error.handler";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
@@ -37,6 +41,8 @@ app.use(
   },
   apiRoutes,
 );
+
+app.use(errorHandler);
 
 app.listen(config.PORT, () => {
   console.log(`Sever is running on ${config.PORT}`);

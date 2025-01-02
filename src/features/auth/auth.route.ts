@@ -1,6 +1,6 @@
 import express from "express";
 import passport from "passport";
-import { login, signup } from "./auth-controller";
+import { login, signup } from "./auth.controller";
 
 const router = express();
 
