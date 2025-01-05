@@ -46,8 +46,8 @@ model Party {
 model Inventory {
   id                    Int                     @id @default(autoincrement())
   name                  String?
-  purchase_price        Int
-  sell_price            Int
+  purchase_price        Int                     @default(0)
+  sell_price            Int                     @default(0)
   tax_rate              Int?
   quantity              Int                     @default(0)
   min_quantity          Int                     @default(0)
