@@ -12,6 +12,7 @@ export const getAllInventory = async (
   try {
     const items = await prisma.$queryRaw`
  SELECT 
+    i.id,
     i.name,
     i.purchase_price,
     i.sell_price,
@@ -23,7 +24,7 @@ export const getAllInventory = async (
     ), 0)::integer as total_quantity
   FROM "Inventory" i
   LEFT JOIN "Inventory_transaction" it ON i.id = it.inventory_id
-  WHERE it.business_id = ${req.id}
+  WHERE i.business_id = ${req.id}
   GROUP BY i.id, i.name, i.purchase_price, i.sell_price
 `;
     res.json(items);
@@ -52,21 +53,25 @@ export const addInventory = async (
         min_quantity: item.min_quantity,
       },
     });
+    console.log("inventory item created", inventoryItem);
 
     if (opening_stock) {
       //create a opening stock transaction
-      await prisma.inventory_transaction.create({
+      const trans = await prisma.inventory_transaction.create({
         data: {
           transaction_type: Inventory_transaction_type.OPEN,
           adjust_quantity: opening_stock,
           price_per_unit: price_per_unit,
-
           inventory_id: inventoryItem.id,
           business_id: req.id,
         },
       });
+
+      console.log("inventory trans. created", trans);
     }
-    res.send("success");
+    res.json({
+      message: "Added successfully",
+    });
   } catch (error) {
     next(error);
   }
