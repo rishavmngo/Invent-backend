@@ -2,7 +2,7 @@ import z from "zod";
 
 export const InventorySchema = z.object({
   id: z.number(),
-  name: z.string().optional(),
+  name: z.string(),
   purchase_price: z.number().optional(),
   sell_price: z.number().optional(),
   tax_rate: z.number().optional(),
@@ -19,6 +19,6 @@ export const InventoryInputSchema = InventorySchema.omit({
   created_at: true,
   updated_at: true,
 }).extend({
-  opening_stock: z.number().nullable(),
-  price_per_unit: z.number().nullable(),
+  opening_stock: z.number().optional(),
+  price_per_unit: z.number().optional(),
 });
