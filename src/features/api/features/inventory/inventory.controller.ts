@@ -10,11 +10,22 @@ export const getAllInventory = async (
   next: NextFunction,
 ) => {
   try {
-    const items = await prisma.inventory.findMany({
-      where: {
-        business_id: req.id,
-      },
-    });
+    const items = await prisma.$queryRaw`
+ SELECT 
+    i.name,
+    i.purchase_price,
+    i.sell_price,
+    COALESCE(SUM(
+      CASE 
+        WHEN it.transaction_type = 'REDUCE' THEN -it.adjust_quantity 
+        ELSE it.adjust_quantity 
+      END
+    ), 0)::integer as total_quantity
+  FROM "Inventory" i
+  LEFT JOIN "Inventory_transaction" it ON i.id = it.inventory_id
+  WHERE it.business_id = ${req.id}
+  GROUP BY i.id, i.name, i.purchase_price, i.sell_price
+`;
     res.json(items);
   } catch (error) {
     next(error);
